@@ -1,0 +1,45 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        cd 02-ci-cd
+        pip install -r requirements.txt
+
+    - name: Run tests
+      run: |
+        cd 02-ci-cd
+        pytest test_app.py -v
+
+    - name: Lint check
+      run: |
+        pip install flake8
+        cd 02-ci-cd
+        flake8 app.py --max-line-length=120
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build success
+      run: echo "Build completed successfully"
