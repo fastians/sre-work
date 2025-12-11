@@ -1,6 +1,6 @@
-# Full-Stack SRE Demo Application
+# TechStore - Production-Ready SRE Demo
 
-Modern application demonstrating SRE practices with **FastAPI backend**, **JavaScript frontends**, and **comprehensive monitoring**.
+Professional e-commerce platform demonstrating **production-level architecture**, **SRE best practices**, and **comprehensive monitoring**.
 
 ## 🚀 Quick Start
 
@@ -91,21 +91,38 @@ http://localhost:3000 (admin/admin)
 python traffic_simulator.py --mode stress --url http://localhost:5001
 ```
 
-## 📁 Project Structure
+## 📁 Production-Level Structure
 
 ```
 02-ci-cd/
-├── app.py                    # FastAPI application
-├── requirements.txt          # Dependencies
-├── Dockerfile               # Container image
-├── docker-compose.yml       # Local orchestration
-├── traffic_simulator.py     # Universal traffic generator
-├── static/
-│   ├── user.html/css/js    # E-commerce frontend
-│   ├── admin.html/css/js   # Admin dashboard
-│   └── sre.html/css/js     # SRE dashboard
-└── k8s/                     # Kubernetes manifests
+├── backend/                      # Backend application
+│   ├── app/
+│   │   └── main.py              # FastAPI app (production-ready)
+│   └── config/
+│       └── settings.py          # Centralized configuration
+│
+├── frontend/                     # Frontend application
+│   ├── public/                  # Static files
+│   │   ├── user.html/css/js    # Customer-facing site (no admin links!)
+│   │   ├── admin.html/css/js   # Internal admin dashboard
+│   │   └── sre.html/css/js     # Internal SRE monitoring
+│   └── assets/                  # Images, fonts
+│
+├── logs/                         # Application logs
+├── data/                         # Persistent data
+├── k8s/                          # Kubernetes manifests
+├── scripts/                      # Utility scripts
+│
+├── .env.example                  # Environment template
+├── .gitignore                    # Git ignore rules
+├── Dockerfile                    # Production container
+├── docker-compose.yml            # Local development
+├── requirements.txt              # Python dependencies
+├── README.md                     # This file
+└── STRUCTURE.md                  # Architecture details
 ```
+
+See [STRUCTURE.md](STRUCTURE.md) for detailed architecture documentation.
 
 ## 🔧 Development
 
