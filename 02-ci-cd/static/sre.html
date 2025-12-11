@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRE Dashboard - System Monitoring</title>
+    <link rel="stylesheet" href="/static/sre.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h2>📊 SRE Dashboard</h2>
+        </div>
+        <nav class="nav-menu">
+            <a href="/" class="nav-item">
+                <span>🏠</span> User Site
+            </a>
+            <a href="/admin" class="nav-item">
+                <span>⚙️</span> Admin
+            </a>
+            <a href="/sre" class="nav-item active">
+                <span>📊</span> SRE Dashboard
+            </a>
+            <div class="nav-divider"></div>
+            <a href="/metrics" target="_blank" class="nav-item">
+                <span>📈</span> Raw Metrics
+            </a>
+            <a href="http://localhost:19090" target="_blank" class="nav-item">
+                <span>🔥</span> Prometheus
+            </a>
+            <a href="http://localhost:3000" target="_blank" class="nav-item">
+                <span>📉</span> Grafana
+            </a>
+            <a href="/docs" target="_blank" class="nav-item">
+                <span>📚</span> API Docs
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="system-info">
+                <div class="info-row">
+                    <span>Uptime:</span>
+                    <span id="uptime">--</span>
+                </div>
+                <div class="info-row">
+                    <span>Version:</span>
+                    <span>v3.0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header class="page-header">
+            <div>
+                <h1>System Reliability Engineering</h1>
+                <p class="subtitle">Real-time monitoring and observability</p>
+            </div>
+            <div class="header-actions">
+                <div class="health-indicator">
+                    <span id="healthDot" class="health-dot"></span>
+                    <span id="healthText">Checking...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">Request Rate</span>
+                    <span class="metric-icon">⚡</span>
+                </div>
+                <div class="metric-value" id="requestRate">0</div>
+                <div class="metric-label">requests/min</div>
+                <div class="metric-trend" id="rateTrend">--</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">Error Rate</span>
+                    <span class="metric-icon">❌</span>
+                </div>
+                <div class="metric-value" id="errorRate">0%</div>
+                <div class="metric-label">errors</div>
+                <div class="metric-trend" id="errorTrend">--</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">P95 Latency</span>
+                    <span class="metric-icon">⏱️</span>
+                </div>
+                <div class="metric-value" id="p95Latency">0</div>
+                <div class="metric-label">milliseconds</div>
+                <div class="metric-trend" id="latencyTrend">--</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-title">Active Resources</span>
+                    <span class="metric-icon">📦</span>
+                </div>
+                <div class="metric-value" id="activeOrders">0</div>
+                <div class="metric-label">orders</div>
+                <div class="metric-trend" id="ordersTrend">--</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Service Status -->
+            <div class="card service-status">
+                <div class="card-header">
+                    <h2>🔧 Service Status</h2>
+                    <button class="btn btn-sm" onclick="checkAllServices()">Check All</button>
+                </div>
+                <div class="card-body">
+                    <div class="service-list">
+                        <div class="service-item">
+                            <div class="service-info">
+                                <div class="service-name">API Server</div>
+                                <div class="service-endpoint">http://localhost:5001</div>
+                            </div>
+                            <div class="service-status" id="apiStatus">
+                                <span class="status-badge checking">Checking...</span>
+                            </div>
+                        </div>
+                        <div class="service-item">
+                            <div class="service-info">
+                                <div class="service-name">Prometheus</div>
+                                <div class="service-endpoint">http://localhost:19090</div>
+                            </div>
+                            <div class="service-status" id="prometheusStatus">
+                                <span class="status-badge checking">Checking...</span>
+                            </div>
+                        </div>
+                        <div class="service-item">
+                            <div class="service-info">
+                                <div class="service-name">Grafana</div>
+                                <div class="service-endpoint">http://localhost:3000</div>
+                            </div>
+                            <div class="service-status" id="grafanaStatus">
+                                <span class="status-badge checking">Checking...</span>
+                            </div>
+                        </div>
+                        <div class="service-item">
+                            <div class="service-info">
+                                <div class="service-name">Node Exporter</div>
+                                <div class="service-endpoint">http://localhost:9100</div>
+                            </div>
+                            <div class="service-status" id="nodeStatus">
+                                <span class="status-badge checking">Checking...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Chart Placeholder -->
+            <div class="card metrics-chart">
+                <div class="card-header">
+                    <h2>📈 Request Timeline</h2>
+                    <select id="timeRange" onchange="updateTimeRange(this.value)">
+                        <option value="5">Last 5 min</option>
+                        <option value="15" selected>Last 15 min</option>
+                        <option value="60">Last 1 hour</option>
+                    </select>
+                </div>
+                <div class="card-body">
+                    <div id="requestChart" class="chart-container">
+                        <div class="chart-placeholder">
+                            <p>📊 Live metrics visualization</p>
+                            <p class="chart-note">Requests are tracked in real-time</p>
+                            <canvas id="metricsCanvas" width="800" height="300"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts & Incidents -->
+            <div class="card alerts">
+                <div class="card-header">
+                    <h2>🚨 Alerts & Incidents</h2>
+                    <button class="btn btn-sm" onclick="clearAlerts()">Clear All</button>
+                </div>
+                <div class="card-body">
+                    <div id="alertsList" class="alerts-list">
+                        <div class="empty-state">No active alerts</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Operations -->
+            <div class="card operations">
+                <div class="card-header">
+                    <h2>📋 Recent Operations</h2>
+                </div>
+                <div class="card-body">
+                    <div id="operationsLog" class="operations-log">
+                        <!-- Operations will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card quick-actions">
+                <div class="card-header">
+                    <h2>⚡ SRE Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="action-grid">
+                        <button class="action-btn" onclick="runHealthCheck()">
+                            <span>🏥</span>
+                            <span>Health Check</span>
+                        </button>
+                        <button class="action-btn" onclick="viewMetrics()">
+                            <span>📊</span>
+                            <span>View Metrics</span>
+                        </button>
+                        <button class="action-btn" onclick="exportData()">
+                            <span>💾</span>
+                            <span>Export Data</span>
+                        </button>
+                        <button class="action-btn" onclick="viewLogs()">
+                            <span>📝</span>
+                            <span>System Logs</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLI/SLO Dashboard -->
+            <div class="card slo">
+                <div class="card-header">
+                    <h2>🎯 SLI/SLO Compliance</h2>
+                </div>
+                <div class="card-body">
+                    <div class="slo-item">
+                        <div class="slo-header">
+                            <span>Availability SLO</span>
+                            <span class="slo-target">Target: 99.9%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="availabilitySLO" style="width: 99.9%"></div>
+                        </div>
+                        <div class="slo-value" id="availabilityValue">99.9%</div>
+                    </div>
+
+                    <div class="slo-item">
+                        <div class="slo-header">
+                            <span>Latency SLO (P95 < 500ms)</span>
+                            <span class="slo-target">Target: 95%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="latencySLO" style="width: 98%"></div>
+                        </div>
+                        <div class="slo-value" id="latencyValue">98%</div>
+                    </div>
+
+                    <div class="slo-item">
+                        <div class="slo-header">
+                            <span>Error Budget Remaining</span>
+                            <span class="slo-target">Monthly</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill success" id="errorBudget" style="width: 85%"></div>
+                        </div>
+                        <div class="slo-value" id="budgetValue">85%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="/static/sre.js"></script>
+</body>
+</html>

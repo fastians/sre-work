@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechStore - Your Electronics Marketplace</title>
+    <link rel="stylesheet" href="/static/user.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h2>⚡ TechStore</h2>
+            </div>
+            <div class="nav-links">
+                <a href="/">Products</a>
+                <a href="#" onclick="showMyOrders()">My Orders</a>
+                <a href="/admin">Admin</a>
+                <a href="/sre">SRE Dashboard</a>
+            </div>
+            <div class="cart">
+                <button class="cart-btn" onclick="toggleCart()">
+                    🛒 Cart (<span id="cartCount">0</span>)
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Welcome to TechStore</h1>
+            <p>Discover the latest in tech - Laptops, Smartphones & More</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="filters">
+            <h3>Categories</h3>
+            <div class="filter-group">
+                <button class="filter-btn active" onclick="filterProducts('all')">All Products</button>
+                <button class="filter-btn" onclick="filterProducts('Laptop')">Laptops</button>
+                <button class="filter-btn" onclick="filterProducts('Smartphone')">Smartphones</button>
+                <button class="filter-btn" onclick="filterProducts('Accessories')">Accessories</button>
+            </div>
+            <h3>Price Range</h3>
+            <div class="price-range">
+                <input type="range" id="priceRange" min="0" max="2000" value="2000" oninput="updatePriceFilter(this.value)">
+                <p>Up to $<span id="priceValue">2000</span></p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="products-header">
+                <h2>Featured Products</h2>
+                <div class="sort">
+                    <select onchange="sortProducts(this.value)">
+                        <option value="name">Sort by Name</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="productsGrid" class="products-grid">
+                <!-- Products will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- My Orders Modal -->
+    <div id="ordersModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>My Orders</h2>
+                <button class="close-btn" onclick="closeOrdersModal()">&times;</button>
+            </div>
+            <div id="ordersList" class="orders-list">
+                <!-- Orders will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cartSidebar" class="cart-sidebar">
+        <div class="cart-header">
+            <h3>Shopping Cart</h3>
+            <button class="close-btn" onclick="toggleCart()">&times;</button>
+        </div>
+        <div id="cartItems" class="cart-items">
+            <p class="empty-cart">Your cart is empty</p>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <strong>Total:</strong>
+                <span id="cartTotal">$0.00</span>
+            </div>
+            <button class="checkout-btn" onclick="checkout()">Checkout</button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="/static/user.js"></script>
+</body>
+</html>

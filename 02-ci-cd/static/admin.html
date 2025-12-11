@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Traffic Simulation</title>
+    <link rel="stylesheet" href="/static/admin.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h2>🔧 Admin Panel</h2>
+        </div>
+        <nav class="nav-menu">
+            <a href="/" class="nav-item">
+                <span>🏠</span> User Site
+            </a>
+            <a href="/admin" class="nav-item active">
+                <span>⚙️</span> Admin
+            </a>
+            <a href="/sre" class="nav-item">
+                <span>📊</span> SRE Dashboard
+            </a>
+            <a href="/docs" target="_blank" class="nav-item">
+                <span>📚</span> API Docs
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="status-indicator">
+                <span id="systemStatus" class="status-dot"></span>
+                <span>System Online</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <header class="page-header">
+            <h1>Traffic Simulation & Management</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="refreshData()">
+                    🔄 Refresh
+                </button>
+            </div>
+        </header>
+
+        <div class="metrics-overview">
+            <div class="metric-card">
+                <div class="metric-icon">📦</div>
+                <div class="metric-info">
+                    <div class="metric-label">Total Orders</div>
+                    <div class="metric-value" id="totalOrders">0</div>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">⚡</div>
+                <div class="metric-info">
+                    <div class="metric-label">Requests/min</div>
+                    <div class="metric-value" id="requestsPerMin">0</div>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">❌</div>
+                <div class="metric-info">
+                    <div class="metric-label">Error Rate</div>
+                    <div class="metric-value" id="errorRate">0%</div>
+                </div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">⏱️</div>
+                <div class="metric-info">
+                    <div class="metric-label">Avg Response</div>
+                    <div class="metric-value" id="avgResponse">0ms</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card traffic-simulation">
+                <div class="card-header">
+                    <h2>🚀 Traffic Simulation</h2>
+                    <div class="simulation-status" id="simulationStatus">Idle</div>
+                </div>
+                <div class="card-body">
+                    <div class="simulation-controls">
+                        <div class="control-group">
+                            <label>Simulation Mode</label>
+                            <select id="simulationMode" class="form-select">
+                                <option value="light">Light Traffic (10 req/min)</option>
+                                <option value="moderate">Moderate Traffic (30 req/min)</option>
+                                <option value="heavy">Heavy Traffic (60 req/min)</option>
+                                <option value="stress">Stress Test (100 req/min)</option>
+                                <option value="spike">Traffic Spike</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label>Duration (seconds)</label>
+                            <input type="number" id="simulationDuration" class="form-input" value="60" min="10" max="300">
+                        </div>
+
+                        <div class="control-group">
+                            <label>Include Errors</label>
+                            <div class="checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="include500" checked> 500 Errors
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="include404" checked> 404 Errors
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="includeTimeout"> Timeouts
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button class="btn btn-primary btn-block" onclick="startSimulation()">
+                                ▶️ Start Simulation
+                            </button>
+                            <button class="btn btn-danger btn-block" onclick="stopSimulation()" disabled id="stopBtn">
+                                ⏹️ Stop Simulation
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="simulation-log">
+                        <h3>Activity Log</h3>
+                        <div id="activityLog" class="log-container">
+                            <div class="log-entry">Ready to start simulation...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card quick-actions">
+                <div class="card-header">
+                    <h2>⚡ Quick Actions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="action-buttons">
+                        <button class="action-btn" onclick="createBulkOrders()">
+                            <span class="action-icon">📦</span>
+                            <span class="action-label">Create 10 Orders</span>
+                        </button>
+                        <button class="action-btn" onclick="simulateError('500')">
+                            <span class="action-icon">❌</span>
+                            <span class="action-label">Trigger 500 Error</span>
+                        </button>
+                        <button class="action-btn" onclick="simulateError('timeout')">
+                            <span class="action-icon">⏱️</span>
+                            <span class="action-label">Simulate Timeout</span>
+                        </button>
+                        <button class="action-btn" onclick="clearAllOrders()">
+                            <span class="action-icon">🗑️</span>
+                            <span class="action-label">Clear All Orders</span>
+                        </button>
+                        <button class="action-btn" onclick="generateLoad()">
+                            <span class="action-icon">🔥</span>
+                            <span class="action-label">Generate Load</span>
+                        </button>
+                        <button class="action-btn" onclick="healthCheck()">
+                            <span class="action-icon">💚</span>
+                            <span class="action-label">Health Check</span>
+                        </button>
+                    </div>
+
+                    <div class="stats-display">
+                        <h3>Session Stats</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-label">Requests Made:</span>
+                                <span class="stat-value" id="requestsMade">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Success:</span>
+                                <span class="stat-value success" id="successCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Errors:</span>
+                                <span class="stat-value error" id="errorCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Avg Time:</span>
+                                <span class="stat-value" id="avgTime">0ms</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card recent-orders">
+                <div class="card-header">
+                    <h2>📋 Recent Orders</h2>
+                    <button class="btn btn-sm" onclick="loadOrders()">Refresh</button>
+                </div>
+                <div class="card-body">
+                    <div id="recentOrdersList" class="orders-table">
+                        <!-- Orders will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="/static/admin.js"></script>
+</body>
+</html>
