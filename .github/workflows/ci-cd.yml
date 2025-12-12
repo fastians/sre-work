@@ -26,13 +26,13 @@ jobs:
     - name: Run tests
       run: |
         cd 02-ci-cd
-        pytest test_app.py -v
+        pytest tests/ -v --tb=short
 
     - name: Lint check
       run: |
         pip install flake8
         cd 02-ci-cd
-        flake8 app.py --max-line-length=120
+        flake8 backend/ --max-line-length=120 --exclude=__pycache__
 
   build:
     needs: test
