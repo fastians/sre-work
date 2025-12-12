@@ -82,17 +82,27 @@ async function checkService(elementId, url, external = false) {
 
 async function loadMetrics() {
     try {
-        const response = await fetch('/orders');
-        const data = await response.json();
+        // Get real stats from backend
+        const statsResponse = await fetch('/api/stats');
+        const stats = await statsResponse.json();
 
-        // Update active orders
-        const activeOrders = data.total || 0;
+        // Get orders
+        const ordersResponse = await fetch('/orders');
+        const ordersData = await ordersResponse.json();
+
+        // Update active orders (real data)
+        const activeOrders = ordersData.total || 0;
         document.getElementById('activeOrders').textContent = activeOrders;
 
-        // Track metrics history
+        // Track metrics history (real requests)
         const now = Date.now();
         metricsHistory.timestamps.push(now);
-        metricsHistory.requests.push(Math.floor(Math.random() * 50 + 10)); // Simulated
+
+        // Calculate current request rate
+        const currentRate = stats.uptime_seconds > 0
+            ? Math.round((stats.total_requests / stats.uptime_seconds) * 60)
+            : 0;
+        metricsHistory.requests.push(currentRate);
 
         // Keep last 20 data points
         if (metricsHistory.timestamps.length > 20) {
@@ -100,25 +110,28 @@ async function loadMetrics() {
             metricsHistory.requests.shift();
         }
 
-        // Calculate request rate
-        const requestRate = calculateRequestRate();
-        document.getElementById('requestRate').textContent = requestRate;
+        // Display real metrics
+        document.getElementById('requestRate').textContent = currentRate;
+        document.getElementById('errorRate').textContent = stats.error_rate.toFixed(1) + '%';
 
-        // Calculate error rate
-        const errorRate = Math.random() * 5; // Simulated
-        document.getElementById('errorRate').textContent = errorRate.toFixed(1) + '%';
-
-        // Calculate P95 latency
-        const p95 = Math.floor(Math.random() * 300 + 50); // Simulated
+        // P95 latency (simulated for now, would need histogram from Prometheus)
+        const p95 = Math.floor(Math.random() * 200 + 50);
         document.getElementById('p95Latency').textContent = p95;
 
-        // Update SLO metrics
-        updateSLO('availabilitySLO', 'availabilityValue', 99.9);
-        updateSLO('latencySLO', 'latencyValue', 98);
-        updateSLO('errorBudget', 'budgetValue', 85);
+        // Update SLO metrics (calculate from real data)
+        const availability = stats.total_requests > 0
+            ? ((stats.total_requests - stats.total_errors) / stats.total_requests) * 100
+            : 100;
+        updateSLO('availabilitySLO', 'availabilityValue', availability);
+
+        const latencySLO = 98; // Would calculate from P95 < 500ms
+        updateSLO('latencySLO', 'latencyValue', latencySLO);
+
+        const errorBudget = 100 - stats.error_rate;
+        updateSLO('errorBudget', 'budgetValue', errorBudget);
 
         // Log operation
-        logOperation('GET', '/orders', 200);
+        logOperation('GET', '/api/stats', 200);
 
     } catch (error) {
         console.error('Failed to load metrics:', error);

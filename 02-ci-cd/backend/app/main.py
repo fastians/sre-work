@@ -137,6 +137,43 @@ async def api_info():
         "metrics": "/metrics"
     }
 
+@app.get("/api/stats")
+async def get_stats():
+    """Get application statistics for dashboards"""
+    # Calculate metrics from Prometheus counters
+    import re
+    metrics_text = generate_latest().decode('utf-8')
+
+    # Parse metrics
+    request_count = 0
+    error_count = 0
+
+    for line in metrics_text.split('\n'):
+        if line.startswith('app_requests_total'):
+            match = re.search(r'} (\d+\.?\d*)', line)
+            if match:
+                request_count += float(match.group(1))
+        elif line.startswith('app_errors_total'):
+            match = re.search(r'} (\d+\.?\d*)', line)
+            if match:
+                error_count += float(match.group(1))
+
+    error_rate = (error_count / request_count * 100) if request_count > 0 else 0
+
+    return {
+        "total_requests": int(request_count),
+        "total_errors": int(error_count),
+        "error_rate": round(error_rate, 2),
+        "active_orders": len(orders_db),
+        "uptime_seconds": int(time.time() - app.state.start_time) if hasattr(app.state, 'start_time') else 0,
+        "status": "healthy"
+    }
+
+# Store start time
+@app.on_event("startup")
+async def store_start_time():
+    app.state.start_time = time.time()
+
 @app.get("/health")
 async def health():
     """Health check endpoint for load balancers"""
@@ -249,6 +286,7 @@ async def simulate_error(error_type: Optional[str] = "random"):
 # Startup event
 @app.on_event("startup")
 async def startup_event():
+    app.state.start_time = time.time()
     logger.info("=" * 50)
     logger.info("TechStore API Starting...")
     logger.info(f"Version: 3.0.0")
