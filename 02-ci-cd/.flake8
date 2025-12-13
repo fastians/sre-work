@@ -13,10 +13,13 @@ exclude =
     frontend
 
 # Ignore specific errors
+# E203: whitespace before ':'
+# E501: line too long (handled by max-line-length)
+# W503: line break before binary operator
 ignore =
-    E203,  # whitespace before ':'
-    E501,  # line too long (handled by max-line-length)
-    W503,  # line break before binary operator
+    E203,
+    E501,
+    W503
 
 # Complexity
 max-complexity = 10
